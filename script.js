@@ -393,18 +393,35 @@ async function fetchAndProcessAllSites() {
         }
 
         // 4. Fetch the sites configuration file
-        const sitesResponse = await fetch(finalSitesUrl);
+        let sitesResponse = await fetch(finalSitesUrl);
+        let rawSitesData;
+        let finalLoadUrl = finalSitesUrl;
         
+        // MODIFICATION START: Implement robust fallback logic
         if (!sitesResponse.ok) {
-            // This is the line that throws the error you saw.
-            // If the fetch fails, provide more detail in the thrown error.
-            throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalSitesUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
-        }
+            // Check if we were trying the GitHub URL and it failed
+            if (githubSitesUrl && finalSitesUrl === githubSitesUrl) {
+                console.warn(`GitHub fetch for sites_file.json failed (${sitesResponse.status} ${sitesResponse.statusText}). Retrying with local path: ${localSitesUrl}`);
+                
+                // --- SECOND ATTEMPT WITH LOCAL PATH ---
+                sitesResponse = await fetch(localSitesUrl);
+                finalLoadUrl = localSitesUrl;
 
-        const rawSitesData = await sitesResponse.json();
+                if (!sitesResponse.ok) {
+                    // Both GitHub and local fetch failed
+                    throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalLoadUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
+                }
+                console.log("Successfully loaded sites configuration from local path.");
+
+            } else {
+                // We were already trying the local path and it failed
+                throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalLoadUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
+            }
+        }
+        // MODIFICATION END
+
+        rawSitesData = await sitesResponse.json();
         let tempSites = transformRawSites(rawSitesData);
-        
-        // ... (rest of the function is unchanged and remains here) ...
         
         // Concurrently fetch forecast data for all sites
         const fetchPromises = tempSites.map(site => fetchAndParseForecast(site));
