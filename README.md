@@ -1,2 +1,1 @@
-# safecoastpro.github.io
-West Africa Coast Flooding Forecasting and Early Waning System.
+SAFECOAST — Protecting West African coasts from flooding. We are an advanced early-warning system dedicated to safeguarding vulnerable coastal communities and ecosystems across West Africa. By combining satellite data, tide- and wave-models, and machine-learning forecasting, SAFECOAST predicts extreme coastal flooding up to 72 hours in advance. We deliver alerts via SMS, mobile apps, community sirens and radio — helping local governments, responders and citizens prepare, act and reduce loss of life and property. 🌊🛡️
