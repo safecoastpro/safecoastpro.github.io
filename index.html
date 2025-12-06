@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeCoast: West Africa Coastal Flooding Forecasting</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">🌊 SAFECOAST Pro</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#" id="nav-forecast">Flood Forecasting </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="nav-historical">Historical Analysis</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid app-content">
+
+        <div id="tab-forecast" class="tab-content-area">
+            <div class="row">
+                <div class="col-md-3 sidebar">
+                    <div id="date-selector-container"></div> 
+                    <div id="forecast-horizon-container"></div>
+                    
+                    <h5 class="text-white text-lg font-bold mb-3">Site Summary</h5>
+                    <div class="card sidebar-card mb-4 p-3">
+                        <h4 id="stat-site-name" class="text-2xl font-bold mb-0">Select a Site</h4>
+                        <small id="location-subtitle" class="text-xs text-slate-300">Threshold: --m</small>
+                        <hr class="my-2 border-slate-500">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold">Max TWL on Validity Date:</span>
+                            <span id="stat-twl" class="text-xl font-bold text-blue-400">-- m</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-semibold">Current Risk:</span>
+                            <span id="stat-risk" class="text-xl font-bold">N/A</span>
+                        </div>
+                    </div>
+                    
+                    <h5 class="text-white text-lg font-bold mb-2">7-Day Outlook (From Run Time)</h5>
+                    <div class="card sidebar-card p-0">
+                        <table class="w-full text-left table-auto">
+                            <thead>
+                                <tr class="bg-slate-700 text-white text-sm">
+                                    <th class="px-2 py-1">Day</th>
+                                    <th class="px-2 py-1">Peak TWL</th>
+                                    <th class="px-2 py-1">Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody id="forecast-table-body">
+                                <tr><td colspan="3" class="text-center py-4 text-slate-400 italic">Loading Data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="col-md-9 main-panel">
+                    <div id="Forecast_map_container" style="height: 770px; position: relative;">
+                        <div id="map" class="leaflet-map-plot"></div>
+                        
+                        <div id="risk_legend_box" class="risk-legend-box">
+                            <h6>Vigilance Risk Level (TWL)</h6>
+                            <div id="legend_content"></div>
+                        </div>
+
+                        <div id="current-date-display-box" class="current-date-display-box">
+                            Operational Date: <span id="current-date-display">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-historical" class="tab-content-area" style="display: none;">
+            <div class="row">
+                <div class="col-md-3 sidebar">
+                    <div id="date-selector-container-hist"></div> 
+                    <h5 class="text-white text-lg font-bold mb-3">Historical Events Analysis</h5>
+                    <form id="historical-controls">
+                        <div class="card sidebar-card">
+                            <div class="card-header">Analysis Selection</div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="site_hist"><strong>Select Coastal Site</strong></label>
+                                    <select class="form-control" id="site_hist"></select>
+                                </div>
+
+                                <div class="form-group mt-3 border-top pt-2">
+                                    <label><strong>TWL Variability Analysis Graphics</strong></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="variance_series" value="variance_series">
+                                        <label class="form-check-label" for="variance_series">TWL series Variance</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="variance_seasonal" value="variance_seasonal">
+                                        <label class="form-check-label" for="variance_seasonal">TWL Seasonal Variance</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="variance_trend" value="variance_trend">
+                                        <label class="form-check-label" for="variance_trend">TWL Trend Variance</label>
+                                    </div>
+                                </div>
+
+                                <div class="p-2 mb-3 bg-dark rounded text-center">
+                                    <strong class="text-white">Flood Events identified (1993-2024):</strong>
+                                    <span id="total-events-display" class="badge badge-info ml-2">--</span>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Select Flood Event Analysis Graphics</strong></label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="bubble" value="bubble" checked>
+                                        <label class="form-check-label" for="bubble">Tide vs Hs</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="seasonal" value="seasonal">
+                                        <label class="form-check-label" for="seasonal">Seasonal Variability</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="interannual" value="interannual">
+                                        <label class="form-check-label" for="interannual">Interannual Variability</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="graph_hist" id="bar" value="bar">
+                                        <label class="form-check-label" for="bar">Event Analysis: TWL Component Contribution</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card sidebar-card mt-3" id="event-selection-group">
+                            <div class="card-header">Extremes Event Details</div>
+                            <div class="card-body">
+                                <label for="event"><strong>Select Historical Extreme Event</strong></label>
+                                <select class="form-control" id="event">
+                                    </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-9 main-panel">
+                    <div id="Historical_plot" class="plotly-plot" style="width: 100%; height: 800px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
