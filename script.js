@@ -6,7 +6,7 @@ const CONFIG = {
     // New GitHub repository configuration
     REPO_OWNER: 'safecoastpro',
     REPO_NAME: 'safecoastpro.github.io',
-    RELEASE_TAG: 'twl_daily_latest',
+    RELEASE_TAG: 'twl_update_latest',
     // Base URL for API calls
     GITHUB_API_BASE: 'https://api.github.com/repos/',
 
