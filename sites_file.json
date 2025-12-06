@@ -1,0 +1,50 @@
+{
+  "GHANA": {
+    "city": "Keta",
+    "bbox": [],
+    "lat_cible": 6.047366,
+    "lon_cible": 1.080522,
+    "threshold": 1.512,
+    "risk_class": [1.746, 1.882]
+  },
+  "TOGO": {
+    "city": "Baguida",
+    "bbox": [],
+    "lat_cible": 6.1609,
+    "lon_cible": 1.3280,
+    "threshold": 1.411,
+    "risk_class": [1.637, 1.792]
+  },
+  "BENIN": {
+    "city": "Finagnon",
+    "bbox": [],
+    "lat_cible": 6.3607,
+    "lon_cible": 2.4769,
+    "threshold": 1.356,
+    "risk_class": [1.565, 1.673]
+  },
+  "IVORY-COAST": {
+    "city": "Abidjan",
+    "bbox": [],
+    "lat_cible": 5.1943,
+    "lon_cible": -3.7385,
+    "threshold": 1.436,
+    "risk_class": [1.649, 1.804]
+  },
+  "NIGERIA": {
+    "city": "Lagos",
+    "bbox": [],
+    "lat_cible": 6.4221,
+    "lon_cible": 3.4918,
+    "threshold": 1.561,
+    "risk_class": [1.802, 1.960]
+  },
+  "CAMEROON": {
+    "city": "Port-Sonara",
+    "bbox": [],
+    "lat_cible": 4.0103,
+    "lon_cible": 9.1133,
+    "threshold": 2.016,
+    "risk_class": [2.354,2.641]
+  }
+}

@@ -11,6 +11,7 @@ const CONFIG = {
     GITHUB_API_BASE: 'https://api.github.com/repos/',
 
     // Sites file
+    DATA_BASE_PATH: './', 
     SITES_FILENAME: 'sites_file.json'
 };
 
@@ -371,48 +372,63 @@ function parseForecastCSV(csvText, site) {
  * Main function to fetch all data, called when the model run time changes.
  */
 async function fetchAndProcessAllSites() {
+    // *** NOTE: Ensure getAssetDownloadUrl() is defined and working ***
+    
     try {
         const sitesFilename = CONFIG.SITES_FILENAME; 
         
         // 1. Attempt to get the GitHub URL for sites_file.json
-        const finalSitesUrl = await getAssetDownloadUrl(sitesFilename);
+        const githubSitesUrl = await getAssetDownloadUrl(sitesFilename);
         
-        if (!finalSitesUrl) {
-            // Critical Error: No fallback, so stop execution.
-            throw new Error(`Critical Error: Sites configuration file (${sitesFilename}) not found on GitHub release tag ${CONFIG.RELEASE_TAG}.`);
-        }
+        // 2. Define the local path (uses BASE_PATH and FILENAME)
+        const localSitesUrl = CONFIG.DATA_BASE_PATH + sitesFilename;
         
-        console.log(`Fetching sites configuration from GitHub URL: ${finalSitesUrl}`);
+        // 3. Prioritize GitHub URL. If null, use the local path.
+        const finalSitesUrl = githubSitesUrl || localSitesUrl;
 
-        // 2. Fetch the sites configuration file
+        if (!githubSitesUrl) {
+            console.warn(`Sites configuration file NOT found on GitHub release. Attempting local path: ${finalSitesUrl}`);
+        } else {
+             console.log(`Fetching sites configuration from GitHub URL: ${finalSitesUrl}`);
+        }
+
+        // 4. Fetch the sites configuration file
         const sitesResponse = await fetch(finalSitesUrl);
         
         if (!sitesResponse.ok) {
+            // This is the line that throws the error you saw.
+            // If the fetch fails, provide more detail in the thrown error.
             throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalSitesUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
         }
 
         const rawSitesData = await sitesResponse.json();
         let tempSites = transformRawSites(rawSitesData);
         
-        // 3. Concurrently fetch forecast data for all sites
+        // ... (rest of the function is unchanged and remains here) ...
+        
+        // Concurrently fetch forecast data for all sites
         const fetchPromises = tempSites.map(site => fetchAndParseForecast(site));
         const results = await Promise.all(fetchPromises);
         
         SITES = results;
         
-        // ... (rest of the function for UI initialization remains unchanged) ...
-
         if (SITES.length > 0) {
             populateMapMarkers(); 
             populateUIControls(); 
+
+            // Trigger the historical tab to initialize now that site data exists
             const histSelect = document.getElementById('site_hist');
             if (histSelect) {
                 histSelect.dispatchEvent(new Event('change', { bubbles: true }));
             }
+            
+            // Set initial site for sidebar if none is selected
             if (!currentSiteData || !SITES.find(s => s.id === currentSiteData.id)) {
                 currentSiteData = SITES[0];
             }
-            window.handleDaySelection(SELECTED_FORECAST_INDEX); 
+
+            // Render current state
+            window.handleDaySelection(SELECTED_FORECAST_INDEX);
         } else {
             throw new Error("No sites loaded or no data available for selected run date.");
         }
