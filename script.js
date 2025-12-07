@@ -4,11 +4,14 @@
 
 const CONFIG = {
     // New GitHub repository configuration
-    REPO_OWNER: 'safecoastpro',
-    REPO_NAME: 'safecoastpro.github.io',
-    RELEASE_TAG: 'twl_update_latest',
+    //REPO_OWNER: 'safecoastpro',
+    //REPO_NAME: 'safecoastpro.github.io',
+    //RELEASE_TAG: 'twl_update_latest',
     // Base URL for API calls
-    GITHUB_API_BASE: 'https://api.github.com/repos/',
+    //GITHUB_API_BASE: 'https://api.github.com/repos/',
+
+    //  NEW R2 CONFIGURATION 
+    DATA_BASE_URL: 'https://pub-4921fc4a0c0d4e00816a9830e124712d.r2.dev',
 
     // Sites file
     DATA_BASE_PATH: './', 
@@ -31,19 +34,18 @@ const VIGILANCE_LEVELS = [
 ];
 
 // ====================================================================================
-// GITHUB DATA FETCHING UTILITIES (FIXED FOR CORS)
+// CLOUDFLARE R2 DATA FETCHING UTILITIES
 // ====================================================================================
 
 /**
- * Constructs the raw download URL for a given filename.
- * Uses raw.githubusercontent.com to bypass CORS restrictions on release assets.
- * * @param {string} filename - The name of the file (e.g., 'sites_file.json').
- * @returns {string} The direct raw URL.
+ * Constructs the direct download URL for a given asset filename from Cloudflare R2.
+ * This function is now synchronous as it only constructs the URL, it does not fetch data.
+ * @param {string} filename - The name of the file (e.g., 'sites_file.json').
+ * @returns {string} The direct download URL.
  */
 function getAssetDownloadUrl(filename) {
-    // Construct the URL directly. No need to call the GitHub API.
-    // Pattern: https://raw.githubusercontent.com/{owner}/{repo}/{tag}/{filename}
-    return `https://raw.githubusercontent.com/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/${CONFIG.RELEASE_TAG}/${filename}`;
+    // Construct the R2 URL by joining the base URL and the filename.
+    return `${CONFIG.DATA_BASE_URL}/${filename}`;
 }
 
 
@@ -272,7 +274,7 @@ async function fetchAndParseForecast(site) {
         const response = await fetch(finalUrl);
         
         if (!response.ok) {
-            console.warn(`Forecast data failed to download for ${site.name} from ${finalUrl}. Status: ${response.status}`);
+            console.warn(`Forecast data failed to download for ${site.name} from R2 ${finalUrl}. Status: ${response.status}`);
             return { ...site, forecastData: { daily: [], hourly: [] } };
         }
 
@@ -352,46 +354,35 @@ async function fetchAndProcessAllSites() {
     try {
         const sitesFilename = CONFIG.SITES_FILENAME; 
         
-        // 1. Attempt to get the GitHub URL for sites_file.json
-        const githubSitesUrl = await getAssetDownloadUrl(sitesFilename);
+         // 1. Get the R2 URL for sites_file.json (synchronous call now)
+         const r2SitesUrl = getAssetDownloadUrl(sitesFilename);
         
         // 2. Define the local path (uses BASE_PATH and FILENAME)
         const localSitesUrl = CONFIG.DATA_BASE_PATH + sitesFilename;
         
         // 3. Prioritize GitHub URL. If null, use the local path.
-        const finalSitesUrl = githubSitesUrl || localSitesUrl;
-
-        if (!githubSitesUrl) {
-            console.warn(`Sites configuration file NOT found on GitHub release. Attempting local path: ${finalSitesUrl}`);
-        } else {
-             console.log(`Fetching sites configuration from GitHub URL: ${finalSitesUrl}`);
-        }
+        let finalSitesUrl = r2SitesUrl;
+        console.log(`Fetching sites configuration from R2 URL: ${finalSitesUrl}`);
 
         // 4. Fetch the sites configuration file
         let sitesResponse = await fetch(finalSitesUrl);
         let rawSitesData;
         let finalLoadUrl = finalSitesUrl;
         
-        // MODIFICATION START: Implement robust fallback logic
+        // MODIFICATION START: Implement robust fallback logic (R2 -> Local)
         if (!sitesResponse.ok) {
-            // Check if we were trying the GitHub URL and it failed
-            if (githubSitesUrl && finalSitesUrl === githubSitesUrl) {
-                console.warn(`GitHub fetch for sites_file.json failed (${sitesResponse.status} ${sitesResponse.statusText}). Retrying with local path: ${localSitesUrl}`);
-                
-                // --- SECOND ATTEMPT WITH LOCAL PATH ---
-                sitesResponse = await fetch(localSitesUrl);
-                finalLoadUrl = localSitesUrl;
+            // R2 fetch failed, fall back to local path
+            console.warn(`R2 fetch for sites_file.json failed (${sitesResponse.status} ${sitesResponse.statusText}). Retrying with local path: ${localSitesUrl}`);
+            
+            // --- SECOND ATTEMPT WITH LOCAL PATH ---
+            sitesResponse = await fetch(localSitesUrl);
+            finalLoadUrl = localSitesUrl;
 
-                if (!sitesResponse.ok) {
-                    // Both GitHub and local fetch failed
-                    throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalLoadUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
-                }
-                console.log("Successfully loaded sites configuration from local path.");
-
-            } else {
-                // We were already trying the local path and it failed
+            if (!sitesResponse.ok) {
+                // Both R2 and local fetch failed
                 throw new Error(`Failed to load ${sitesFilename}. Final URL tried: ${finalLoadUrl}. Status: ${sitesResponse.status} ${sitesResponse.statusText}`);
             }
+            console.log("Successfully loaded sites configuration from local path.");
         }
         // MODIFICATION END
 
@@ -872,7 +863,7 @@ async function fetchAndParseXtremEvents(siteId) {
     const finalUrl = await getAssetDownloadUrl(assetName);
 
     if (!finalUrl) {
-        console.warn(`Xtrem event catalog (${assetName}) not found on GitHub release for ${siteId}. Returning empty data.`);
+        console.warn(`Xtrem event data (${assetName}) not found on R2 for ${siteId}. Returning empty data.`);
         EVENT_DATA_CACHE[siteId] = { count: 0, events: [] };
         return EVENT_DATA_CACHE[siteId];
     }
@@ -881,7 +872,7 @@ async function fetchAndParseXtremEvents(siteId) {
         const response = await fetch(finalUrl);
         
         if (!response.ok) {
-            console.warn(`Xtrem event catalog failed to download for ${siteId} from ${finalUrl}. Status: ${response.status}`);
+            console.warn(`Xtrem event data failed to download for ${siteId} from R2 ${finalUrl}. Status: ${response.status}`);
             EVENT_DATA_CACHE[siteId] = { count: 0, events: [] };
             return EVENT_DATA_CACHE[siteId];
         }
