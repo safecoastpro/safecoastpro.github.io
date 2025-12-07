@@ -31,53 +31,19 @@ const VIGILANCE_LEVELS = [
 ];
 
 // ====================================================================================
-// GITHUB DATA FETCHING UTILITIES
+// GITHUB DATA FETCHING UTILITIES (FIXED FOR CORS)
 // ====================================================================================
 
-let RELEASE_INFO = null; // Cache for the release data
-
 /**
- * Fetches the metadata for the specific GitHub release tag.
- * @returns {Object} The release data object from GitHub.
+ * Constructs the raw download URL for a given filename.
+ * Uses raw.githubusercontent.com to bypass CORS restrictions on release assets.
+ * * @param {string} filename - The name of the file (e.g., 'sites_file.json').
+ * @returns {string} The direct raw URL.
  */
-async function getReleaseInfo() {
-    if (RELEASE_INFO) {
-        return RELEASE_INFO;
-    }
-
-    const url = `${CONFIG.GITHUB_API_BASE}${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/releases/tags/${CONFIG.RELEASE_TAG}`;
-    
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-        }
-        RELEASE_INFO = await response.json();
-        return RELEASE_INFO;
-    } catch (e) {
-        console.error("Failed to fetch GitHub release metadata:", e);
-        // Important: Use the data directory as fallback if the API fails, 
-        // assuming files might still be present locally in development.
-        return null; 
-    }
-}
-
-/**
- * Constructs the raw download URL for a given asset filename.
- * @param {string} filename - The name of the file to download (e.g., 'all_twl_data_GHANA_20251206.csv').
- * @returns {string|null} The direct download URL, or null if the release/asset is not found.
- */
-async function getAssetDownloadUrl(filename) {
-    const info = await getReleaseInfo();
-    if (!info || !info.assets) {
-        console.warn(`Release info not available or assets array empty for tag ${CONFIG.RELEASE_TAG}.`);
-        return null;
-    }
-
-    const asset = info.assets.find(a => a.name === filename);
-    
-    // GitHub API automatically redirects to the raw file when calling the download_url
-    return asset ? asset.browser_download_url : null;
+function getAssetDownloadUrl(filename) {
+    // Construct the URL directly. No need to call the GitHub API.
+    // Pattern: https://raw.githubusercontent.com/{owner}/{repo}/{tag}/{filename}
+    return `https://raw.githubusercontent.com/${CONFIG.REPO_OWNER}/${CONFIG.REPO_NAME}/${CONFIG.RELEASE_TAG}/${filename}`;
 }
 
 
@@ -293,7 +259,8 @@ async function fetchAndParseForecast(site) {
     const assetName = `all_twl_data_${shortId}_${runDate}.csv`;
     
     // Fetch GitHub URL only
-    const finalUrl = await getAssetDownloadUrl(assetName);
+    //const finalUrl = await getAssetDownloadUrl(assetName);
+    const finalUrl = getAssetDownloadUrl(assetName); // No 'await' needed anymore
 
     if (!finalUrl) {
         console.warn(`Forecast Asset ${assetName} not found on GitHub release. Returning empty data.`);
