@@ -249,8 +249,8 @@ function transformRawSites(rawData) {
  */
 async function fetchAndParseForecast(site) {
     const siteId = site.id; // e.g., "TWL_Baguida_TOGO"
-    // SELECTED_RUN_DATE is assumed to be a global variable (e.g., '2025-12-06') and is converted to the required file format (e.g., '20251206').
-    const runDate = SELECTED_RUN_DATE.replace(/-/g, '');
+    // SELECTED_RUNTIME_DATE is assumed to be a global variable (e.g., '2025-12-06') and is converted to the required file format (e.g., '20251206').
+    const runDate = SELECTED_RUNTIME_DATE.replace(/-/g, '');
 
     // The actual files use a short ID (e.g., TOGO), which is the last part of the site ID.
     const parts = siteId.split('_');
