@@ -432,7 +432,20 @@ async function fetchAndProcessAllSites() {
 function initializeMap() {
     if (myLeafletMap) return;
 
-    myLeafletMap = L.map('map', {zoomControl : true}).setView([5.0, 2.0], 6);
+    //myLeafletMap = L.map('map', {zoomControl : true}).setView([5.0, 2.0], 6);
+    myLeafletMap = L.map('map', {
+        center: [6.5, -3],        // Central Gulf of Guinea (Good focal point)
+        zoom: 6, 
+        minZoom: 4,               // Prevent zooming too far OUT
+        maxZoom: 16,              // Prevent zooming too far IN
+        maxBoundsViscosity: 1.0   // Strong resistance at edges
+    });
+    // Limit panning to WEST AFRICA bounding box (Cape Verde → Cameroon)
+    const westAfricaBounds = [
+        [ -5, -30 ],    // SW corner
+        [ 26, 15 ]      // NE corner
+    ];
+    myLeafletMap.setMaxBounds(westAfricaBounds);
     markerLayerGroup = L.layerGroup().addTo(myLeafletMap); 
 
     // ----- BASEMAPS -----------------------------------------------------
@@ -1423,12 +1436,46 @@ async function renderHistoricalPlot(graphType, siteId, eventId) {
     }
 }
 
+// ================================
+// SIDEBAR COLLAPSE / EXPAND LOGIC
+// ================================
+function setupSidebarToggle() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarHist = document.getElementById('sidebar-hist');
+    const btn = document.getElementById('sidebar-toggle');
+
+    btn.addEventListener('click', () => {
+        const targets = [sidebar, sidebarHist].filter(x => x);
+
+        const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+
+        targets.forEach(el => {
+            if (isCollapsed) {
+                el.classList.remove('sidebar-collapsed');
+                el.classList.add('sidebar-expanded');
+            } else {
+                el.classList.remove('sidebar-expanded');
+                el.classList.add('sidebar-collapsed');
+            }
+        });
+
+        btn.innerText = isCollapsed ? "«" : "☰";
+
+        // VERY IMPORTANT: Resize Leaflet map
+        setTimeout(() => {
+            if (myLeafletMap) myLeafletMap.invalidateSize();
+            if (Plotly) Plotly.Plots.resize('Historical_plot');
+        }, 400);
+    });
+}
+
 
 // ====================================================================================
 // INITIALIZATION 
 // ====================================================================================
 
 window.onload = function() {
+    setupSidebarToggle();
     // 1. Initialize UI shell IMMEDIATELY (Map, date inputs)
     setupDateSelector(); 
     setupForecastHorizonSlider();

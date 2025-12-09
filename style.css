@@ -1,6 +1,8 @@
-/* Custom CSS for Professional Coastal Flooding Dashboard Theme */
+/* ============================================================
+   PROFESSIONAL COASTAL FLOODING DASHBOARD THEME
+   ============================================================ */
 
-/* Vigilance Colors (Updated to match user's script colors) */
+/* Vigilance Colors variables */
 :root {
     --color-green: #28a745;    /* No Flood */
     --color-yellow: #ffc107;   /* Warning */
@@ -15,13 +17,93 @@
     padding-top: 1px;
 }
 
-/* Sidebar Styling */
+/* ------------------------------------------------------------
+   SIDEBAR + FLEX LAYOUT (DYNAMIC COLLAPSE)
+   ------------------------------------------------------------ */
+
+/* Flex container replacing Bootstrap rows */
+.flex-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+
+/* Sidebar (expanded default width) */
 .sidebar {
     background-color: var(--color-dark-bg);
-    padding: 15px;
     color: white;
+    padding: 15px;
+    width: 400px;            
     border-radius: 2px;
+
+    /* Smooth animation */
+    transition: width 0.3s ease-in-out,
+                padding 0.3s ease-in-out,
+                opacity 0.3s ease-in-out;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
+
+/* Collapsed sidebar */
+.sidebar-collapsed {
+    width: 0 !important;
+    padding: 25Spx !important;
+    opacity: 0;
+}
+
+/* Expanded sidebar */
+.sidebar-expanded {
+    width: 400px !important;
+    opacity: 1;
+}
+
+/* Main panel expands dynamically */
+.main-panel {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* unify both sidebar widths */
+.sidebar, #sidebar-hist {
+    width: 400px;
+}
+
+/* ensure main panels grow */
+#main-panel, #main-panel-hist {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* ------------------------------------------------------------
+   SIDEBAR TOGGLE BUTTON
+   ------------------------------------------------------------ */
+#sidebar-toggle {
+    position: fixed;
+    top: 70px;             /* Adjust based on navbar height */
+    left: 4px;
+    z-index: 3000;
+    background: #3e4a55;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.2s ease-in-out;
+}
+
+#sidebar-toggle:hover {
+    background: #4d5965;
+}
+
+/* ------------------------------------------------------------
+   SIDEBAR CARDS / UI ELEMENTS
+   ------------------------------------------------------------ */
 
 .sidebar-card {
     background-color: var(--color-sidebar);
@@ -42,46 +124,37 @@
     margin-top: 10px;
 }
 
-/* Main Panel Styling */
-.main-panel {
-    padding: 0 2px;
-}
-
-/* Plot Container Styling */
-.plotly-plot {
-    width: 100%;
-    margin-bottom: 10px;
-    background-color: #f8f9fa; 
-    border-radius: 2px;
-    padding: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* --- Map and Overlay Styling --- */
+/* ------------------------------------------------------------
+   MAP + OVERLAYS
+   ------------------------------------------------------------ */
 #Forecast_map_container {
-    position: relative; 
+    position: relative;
     height: 770px;
     border-radius: 2px;
     overflow: hidden;
 }
 
 .leaflet-map-plot {
-    height: 100%; 
     width: 100%;
+    height: 100%;
 }
 
-/* Vigilance Risk Legend Box */
 .risk-legend-box {
     position: absolute;
     top: 14px;
     right: 56px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255,255,255,0.9);
     padding: 10px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     z-index: 900;
     font-size: 0.9rem;
 }
+
+
+/* ------------------------------------------------------------
+   OTHER UI COMPONENTS
+   ------------------------------------------------------------ */
 
 .legend-item {
     display: flex;
@@ -97,71 +170,15 @@
     border-radius: 50%;
 }
 
-/* Hide event selection by default */
 #event-selection-group {
     display: none;
 }
 
-/* --- Leaflet Control Styles (for Slider) --- */
-.leaflet-bar.forecast-slider-control {
-    background-color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    width: 90vw; /* Make it wide on small screens */
-    max-width: 550px; /* Limit width on large screens */
-    transform: translateX(-50%);
-    left: 50%;
-    bottom: 20px;
-    z-index: 1000;
-}
-
-.slider-container {
-    position: relative;
-    padding: 0 10px 15px;
-}
-
-#day-slider {
-    width: 100%;
-    cursor: pointer;
-}
-
-.date-labels-container {
-    position: absolute;
-    width: 100%;
-    top: 30px;
-    left: 0;
-}
-
-.date-label {
-    font-size: 0.7rem;
-    font-weight: bold;
-    color: #6c757d;
-    cursor: pointer;
-}
-
-.date-label.active {
-    color: #007bff;
-    font-size: 0.8rem;
-}
-
-/* Pulse Animation for Severe Risk */
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-  70% { transform: scale(1.2); box-shadow: 0 0 0 15px rgba(220, 53, 69, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-}
-
-.pulse-severe {
-  animation: pulse 1.5s infinite;
-}
-
-/* Date Display Box */
 .current-date-display-box {
     position: absolute;
-    top: 15px;
-    left: 15px;
-    background-color: rgba(0, 0, 0, 0.7);
+    top: 850px;
+    left: 700px;
+    background-color: rgba(0,0,0,0.7);
     color: white;
     padding: 8px 12px;
     border-radius: 5px;
@@ -169,11 +186,11 @@
     z-index: 900;
 }
 
-/* Chart Popup Styling */
+/* Popups */
 .water-level-popup .leaflet-popup-content-wrapper {
     padding: 5px;
     border-radius: 8px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .chart-popup-container {
@@ -181,48 +198,37 @@
     height: 300px;
 }
 
-/* Generic utility styles to support your script's use of tailwind classes like 'flex', 'mb-2', etc. */
+/* ------------------------------------------------------------
+   Utility Styles (Tailwind-like)
+   ------------------------------------------------------------ */
 .flex { display: flex; }
 .justify-between { justify-content: space-between; }
 .items-center { align-items: center; }
 .mb-2 { margin-bottom: 0.5rem; }
-.text-sm { font-size: 0.875rem; }
-.text-xl { font-size: 1.25rem; }
-.font-bold { font-weight: 700; }
-.text-blue-400 { color: #60a5fa; }
-.text-slate-700 { color: #334155; }
-.text-slate-500 { color: #64748b; }
-.text-slate-300 { color: #cbd5e1; }
-.text-2xl { font-size: 1.5rem; }
-.mb-0 { margin-bottom: 0; }
-.my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
-.border-slate-500 { border-color: #64748b; }
-.text-white { color: white; }
-.text-lg { font-size: 1.125rem; }
 .mb-3 { margin-bottom: 0.75rem; }
 .mb-4 { margin-bottom: 1rem; }
 .p-3 { padding: 0.75rem; }
 .p-0 { padding: 0; }
-.w-full { width: 100%; }
-.table-auto { table-layout: auto; }
-.bg-slate-700 { background-color: #475569; }
+.text-sm { font-size: 0.875rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.font-bold { font-weight: 700; }
+.text-white { color:white; }
+.text-blue-400 { color:#60a5fa; }
+.text-slate-300 { color:#cbd5e1; }
+.text-slate-500 { color:#64748b; }
+.bg-slate-700 { background:#475569; }
 .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.font-medium { font-weight: 500; }
-.text-slate-600 { color: #475569; }
-.bg-blue-50 { background-color: #eff6ff; }
-.border-blue-200 { border-color: #bfdbfe; }
-.hover\:bg-slate-50:hover { background-color: #f8fafc; }
+.py-1 { padding-top:0.25rem; padding-bottom:0.25rem; }
+.table-auto { table-layout:auto; }
+.w-full { width:100%; }
 
-/* Styles specific to the new dynamic date selector */
-.form-control-range {
-    width: 100%;
+/* Pulse animation for severe risk */
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,53,69,0.4); }
+  70% { transform: scale(1.2); box-shadow: 0 0 0 15px rgba(220,53,69,0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,53,69,0); }
 }
-.badge-primary {
-    background-color: #007bff;
-    color: white;
-}
-.bg-secondary {
-    background-color: #6c757d !important;
-}
+
+.pulse-severe { animation: pulse 1.5s infinite; }
+

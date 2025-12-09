@@ -9,9 +9,12 @@
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
     <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 
+    <button id="sidebar-toggle">☰</button>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">🌊 SAFECOAST Pro</a>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -22,6 +25,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#" id="nav-historical">Historical Analysis</a>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="nav-about" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> About
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="nav-about">
+                        <a class="dropdown-item" href="https://safecoast.netlify.app" target="_blank">
+                            Project
+                        </a>
+                        <a class="dropdown-item" href="https://fadodo.github.io" target="_blank">
+                            Authors
+                        </a>
+                    </div>
+                </li>
             </ul>
         </div>
     </nav>
@@ -29,11 +44,10 @@
     <div class="container-fluid app-content">
 
         <div id="tab-forecast" class="tab-content-area">
-            <div class="row">
-                <div class="col-md-3 sidebar">
+            <div class="flex-layout">
+                <div id="sidebar" class="sidebar sidebar-collapsed">
                     <div id="date-selector-container"></div> 
                     <div id="forecast-horizon-container"></div>
-                    
                     <h5 class="text-white text-lg font-bold mb-3">Site Summary</h5>
                     <div class="card sidebar-card mb-4 p-3">
                         <h4 id="stat-site-name" class="text-2xl font-bold mb-0">Select a Site</h4>
@@ -66,8 +80,8 @@
                     </div>
                 </div>
                 
-                <div class="col-md-9 main-panel">
-                    <div id="Forecast_map_container" style="height: 770px; position: relative;">
+                <div id="main-panel" class="main-panel">
+                    <div id="Forecast_map_container" style="height: 900px; position: relative;">
                         <div id="map" class="leaflet-map-plot"></div>
                         
                         <div id="risk_legend_box" class="risk-legend-box">
@@ -83,9 +97,10 @@
             </div>
         </div>
 
+        <!-- HISTORICAL TAB -->
         <div id="tab-historical" class="tab-content-area" style="display: none;">
-            <div class="row">
-                <div class="col-md-3 sidebar">
+            <div class="flex-layout">
+                <div id="sidebar-hist" class="sidebar sidebar-collapsed">
                     <div id="date-selector-container-hist"></div> 
                     <h5 class="text-white text-lg font-bold mb-3">Historical Events Analysis</h5>
                     <form id="historical-controls">
@@ -150,8 +165,8 @@
                     </form>
                 </div>
 
-                <div class="col-md-9 main-panel">
-                    <div id="Historical_plot" class="plotly-plot" style="width: 100%; height: 800px;"></div>
+                <div id="main-panel-hist" class="main-panel">
+                    <div id="Historical_plot" class="plotly-plot" style="height: 900px; position: relative;"></div>
                 </div>
             </div>
         </div>
