@@ -33,6 +33,72 @@ const VIGILANCE_LEVELS = [
     { level: "Severe Flood", color: RISK_COLORS["Severe Flood"], description: "Extreme and destructive flooding." }
 ];
 
+
+// ====================================================================================
+// RESET OF THE APPLICATION TO INITIAL STATE
+// ====================================================================================
+function resetApplication() {
+    console.log("Resetting SafeCoast to initial state...");
+
+    /* ---------------------------------------------------------
+        1. Reset tab to Forecast
+    --------------------------------------------------------- */
+    document.getElementById("tab-forecast").style.display = "block";
+    document.getElementById("tab-historical").style.display = "none";
+
+    /* ---------------------------------------------------------
+        2. Collapse both sidebars
+    --------------------------------------------------------- */
+    const sidebars = [document.getElementById("sidebar"), document.getElementById("sidebar-hist")];
+    sidebars.forEach(sb => {
+        if (!sb) return;
+        sb.classList.remove("sidebar-expanded");
+        sb.classList.add("sidebar-collapsed");
+    });
+
+    /* Change button icon to collapsed */
+    const btn = document.getElementById("sidebar-toggle");
+    if (btn) btn.innerText = "☰";
+
+    /* ---------------------------------------------------------
+        3. Reset selected site + statistics UI
+    --------------------------------------------------------- */
+    document.getElementById("stat-site-name").innerText = "Select a Site";
+    document.getElementById("location-subtitle").innerText = "Threshold: -- m";
+    document.getElementById("stat-twl").innerText = "-- m";
+    document.getElementById("stat-risk").innerText = "N/A";
+
+    /* ---------------------------------------------------------
+        4. Reset forecast table
+    --------------------------------------------------------- */
+    document.getElementById("forecast-table-body").innerHTML =
+        `<tr><td colspan="3" class="text-center py-4 text-slate-400 italic">Loading Data...</td></tr>`;
+
+    /* ---------------------------------------------------------
+        5. Reset map view and clear highlights
+    --------------------------------------------------------- */
+    if (myLeafletMap) {
+        myLeafletMap.setView([6.5, -3], 6); // default WA view
+        if (window.selectedMarker) {
+            myLeafletMap.removeLayer(window.selectedMarker);
+            window.selectedMarker = null;
+        }
+        setTimeout(() => myLeafletMap.invalidateSize(), 200);
+    }
+
+    /* ---------------------------------------------------------
+        6. Reset date selector + slider (if defined)
+    --------------------------------------------------------- */
+    if (window.resetDateSelector) resetDateSelector();
+    if (window.resetForecastHorizon) resetForecastHorizon();
+
+    /* ---------------------------------------------------------
+        7. Reset historical charts
+    --------------------------------------------------------- */
+    const histPlot = document.getElementById("Historical_plot");
+    if (histPlot) Plotly.purge(histPlot);
+}
+
 // ====================================================================================
 // CLOUDFLARE R2 DATA FETCHING UTILITIES
 // ====================================================================================
@@ -478,7 +544,13 @@ function initializeMap() {
     const overlayMaps = {"Forecast Sites": markerLayerGroup};
     // Add layer control to the map
     L.control.layers(baseMaps, overlayMaps, { collapsed: true }).addTo(myLeafletMap);
+
+    // ----- RESET MAP TO INITIAL STATE------
+    myLeafletMap.on("click", function() {
+        resetApplication();
+    });
 }
+
 
 function createMarkerIcon(risk) {
     const color = RISK_COLORS[risk];
@@ -1488,5 +1560,10 @@ window.onload = function() {
 
     // 2. Start Asynchronous Data Fetching (populates markers, updates sidebar)
     fetchAndProcessAllSites(); 
+    // 3. Start Reset when a click on navbar brand
+    document.getElementById("navbar-brand").addEventListener("click", function (e) {
+        e.preventDefault();
+        resetApplication();
+    });
     
 };
