@@ -243,7 +243,7 @@
     height: 100%;
     max-height: 35px;   /* keeps it safely inside navbar */
     width: auto;
-    /*display: inline-block;*/
+    display: inline-block;
 }
 #navbar-brand:hover #navbar-logo {
     opacity: 0.85;
