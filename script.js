@@ -546,8 +546,10 @@ function initializeMap() {
     L.control.layers(baseMaps, overlayMaps, { collapsed: true }).addTo(myLeafletMap);
 
     // ----- RESET MAP TO INITIAL STATE------
-    myLeafletMap.on("click", function() {
-        resetApplication();
+    myLeafletMap.on("click", function(e) {
+        if (!e.originalEvent.target.closest('.leaflet-control')) {
+            resetApplication();
+        }
     });
 }
 
