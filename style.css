@@ -232,3 +232,21 @@
 
 .pulse-severe { animation: pulse 1.5s infinite; }
 
+/* ------------------------------------------------------------
+   navigation bar
+   ------------------------------------------------------------ */
+#navbar-brand {
+    margin-left: 40px;       /* Move brand slightly to the right */
+}
+
+#navbar-logo {
+    height: 100%;
+    max-height: 35px;   /* keeps it safely inside navbar */
+    width: auto;
+    /*display: inline-block;*/
+}
+#navbar-brand:hover #navbar-logo {
+    opacity: 0.85;
+    transition: opacity 0.2s ease-in-out;
+}
+
