@@ -1262,28 +1262,71 @@ async function renderHistoricalPlot(graphType, siteId, eventId) {
         }
         
         else if (graphType === 'seasonal') {
-            // --- SEASONAL VARIABILITY (Box Plot) ---
+            // --- SEASONAL VARIABILITY (Box Plot + Event Count) ---
             const data = await fetchSeasonalData(siteId);
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             
-            plotData = months.filter(m => data[m] && data[m].length > 0).map(month => ({
+            // 1. Identify months that actually have data
+            const validMonths = months.filter(m => data[m] && data[m].length >0);
+
+            // 2. Create the Box Plot Traces
+            // We set showlegend: false to avoid cluttering the legend with 12 month names
+            const boxTraces = validMonths.map(month => ({
                 y: data[month],
-                name: month,
+                name: month, // Used for X-axis grouping
                 type: 'box',
                 boxpoints: 'all',
-                marker: { color: '#1f78b4' },
-                line: { color: '#1f78b4' }
+                jitter: 0.3,
+                pointpos: -1.8,
+                marker: { color: '#1f78b4', opacity: 0.8 },
+                line: { color: '#1f78b4' },
+                showlegend: false 
             }));
 
+            // 3. Create the Line Trace for Event Counts (New Logic)
+            const countTrace = {
+                x: validMonths,
+                y: validMonths.map(m => data[m].length), // Calculate count per month
+                name: 'Number of Events',
+                type: 'scatter',
+                mode: 'lines+markers',
+                yaxis: 'y2', // Assign to the secondary Y-axis
+                line: { color: '#e31a1c', width: 1 },
+                marker: { color: '#e31a1c', size: 8 }
+            };
+
+            // Combine traces: Boxes first, then the Line on top
+            plotData = [...boxTraces, countTrace];
+
             layout = {
-                title: `Seasonal Variability of TWL for ${site.name}`,
+                title: `Seasonal Variability: TWL Distribution & Event Frequency - ${site.name}`,
                 xaxis: { title: 'Month' },
-                yaxis: { title: 'Total Water Level (TWL) (m)' },
+                
+                // Primary Y-Axis (Left) - TWL
+                yaxis: { 
+                    title: 'Total Water Level (TWL) (m)',
+                    titlefont: { color: '#1f78b4' },
+                    tickfont: { color: '#1f78b4' }
+                },
+                
+                // Secondary Y-Axis (Right) - Event Counts
+                yaxis2: {
+                    title: 'Number of Events',
+                    overlaying: 'y',
+                    side: 'right',
+                    titlefont: { color: '#e31a1c' },
+                    tickfont: { color: '#e31a1c' },
+                    showgrid: false, // Hide grid for clarity
+                    rangemode: 'tozero' // Ensure it starts at 0
+                },
+                
                 height: 800,
-                margin: {t: 50, b: 70, l: 70, r: 20},
-                showlegend: false
+                margin: {t: 70, b: 70, l: 70, r: 70},
+                showlegend: true,
+                legend: { x: 0.01, y: 1.1, orientation: 'v' } // Legend at top-left
             };
         }
+        
         
         else if (graphType === 'interannual') {
             // --- INTERANNUAL VARIABILITY (Bar Chart) ---
