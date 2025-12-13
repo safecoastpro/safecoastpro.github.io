@@ -10,95 +10,145 @@
     --color-red: #dc3545;      /* Severe Flood */
     --color-dark-bg: #2b3e50;  /* Dark Blue/Gray Background */
     --color-sidebar: #3e4a55;  /* Sidebar/Card Header */
+    --navbar-height: 56px; /* Standard Bootstrap navbar height */
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden; /* Prevent scrolling of the main page */
 }
 
 /* General App Content Spacing */
 .app-content {
-    padding-top: 1px;
+    /* Fill remaining height below navbar */
+    height: calc(100vh - var(--navbar-height));
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.tab-content-area {
+    height: 100%;
+    width: 100%;
 }
 
 /* ------------------------------------------------------------
-   SIDEBAR + FLEX LAYOUT (DYNAMIC COLLAPSE)
+   FLEX LAYOUT
    ------------------------------------------------------------ */
 
-/* Flex container replacing Bootstrap rows */
 .flex-layout {
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: auto;
+    height: 100%; /* Important: Fill the container */
+    position: relative;
 }
 
-/* Sidebar (expanded default width) */
+/* ------------------------------------------------------------
+   SIDEBAR (Responsive)
+   ------------------------------------------------------------ */
+
 .sidebar {
     background-color: var(--color-dark-bg);
     color: white;
     padding: 15px;
-    width: 400px;            
-    border-radius: 2px;
-
-    /* Smooth animation */
-    transition: width 0.3s ease-in-out,
-                padding 0.3s ease-in-out,
-                opacity 0.3s ease-in-out;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    width: 400px; /* Desktop width */
+    height: 100%; /* Full height */
+    overflow-y: auto; /* Scrollable content */
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
-/* Collapsed sidebar */
+/* Collapsed state */
 .sidebar-collapsed {
-    width: 0 !important;
-    padding: 25Spx !important;
-    opacity: 0;
+    margin-left: -400px; /* Hide by moving off-canvas */
 }
 
-/* Expanded sidebar */
+/* Expanded state */
 .sidebar-expanded {
-    width: 400px !important;
-    opacity: 1;
+    margin-left: 0;
 }
 
-/* Main panel expands dynamically */
-.main-panel {
-    flex-grow: 1;
-    min-width: 0;
-    padding: 0;
-    transition: all 0.3s ease-in-out;
-}
-
-/* unify both sidebar widths */
-.sidebar, #sidebar-hist {
+/* Sidebar styling for Hist matches main Sidebar */
+#sidebar-hist {
     width: 400px;
 }
 
-/* ensure main panels grow */
-#main-panel, #main-panel-hist {
+/* ------------------------------------------------------------
+   MAIN PANEL (Map Area)
+   ------------------------------------------------------------ */
+.main-panel {
     flex-grow: 1;
+    height: 100%;
     min-width: 0;
+    position: relative;
+}
+
+#Forecast_map_container, #Historical_plot {
+    width: 100%;
+    height: 100%; /* Fills the main panel */
+    position: relative;
 }
 
 /* ------------------------------------------------------------
    SIDEBAR TOGGLE BUTTON
    ------------------------------------------------------------ */
 #sidebar-toggle {
-    position: fixed;
-    top: 70px;             /* Adjust based on navbar height */
-    left: 4px;
-    z-index: 3000;
+    position: absolute;
+    top: 10px; /* Relative to main panel, not fixed to window */
+    left: 10px;
+    z-index: 1100; /* Above sidebar and map */
     background: #3e4a55;
     color: white;
     border: none;
-    padding: 6px 12px;
-    font-size: 18px;
+    padding: 8px 12px;
+    font-size: 20px;
     border-radius: 4px;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: background 0.2s ease-in-out;
 }
 
-#sidebar-toggle:hover {
-    background: #4d5965;
+/* ------------------------------------------------------------
+   FLOATING ELEMENTS (Map Overlays)
+   ------------------------------------------------------------ */
+
+/* Legend: Top Right */
+.risk-legend-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255,255,255,0.95);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 900;
+    font-size: 0.85rem;
+    max-width: 200px;
+}
+
+/* Date Display: Bottom Right (Fixed from absolute pixel values) */
+.current-date-display-box {
+    position: absolute;
+    bottom: 25px; 
+    left: 10px; /* Anchored to right */
+    top: auto;   /* Reset top */
+    right: auto;  /* Reset left */
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    z-index: 900;
+    pointer-events: none; /* Let clicks pass through */
+}
+
+/* Chart Popup: Responsive */
+.chart-popup-container {
+    width: 100%;
+    min-width: 300px;
+    max-width: 500px;
+    height: 250px; /* reduced height slightly for mobile */
 }
 
 /* ------------------------------------------------------------
@@ -129,7 +179,7 @@
    ------------------------------------------------------------ */
 #Forecast_map_container {
     position: relative;
-    height: 770px;
+    height: 70vh;
     border-radius: 2px;
     overflow: hidden;
 }
@@ -137,18 +187,6 @@
 .leaflet-map-plot {
     width: 100%;
     height: 100%;
-}
-
-.risk-legend-box {
-    position: absolute;
-    top: 14px;
-    right: 56px;
-    background-color: rgba(255,255,255,0.9);
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 900;
-    font-size: 0.9rem;
 }
 
 
@@ -174,28 +212,12 @@
     display: none;
 }
 
-.current-date-display-box {
-    position: absolute;
-    top: 850px;
-    left: 700px;
-    background-color: rgba(0,0,0,0.7);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    z-index: 900;
-}
 
 /* Popups */
 .water-level-popup .leaflet-popup-content-wrapper {
     padding: 5px;
     border-radius: 8px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-}
-
-.chart-popup-container {
-    width: 500px;
-    height: 300px;
 }
 
 /* ------------------------------------------------------------
@@ -233,20 +255,63 @@
 .pulse-severe { animation: pulse 1.5s infinite; }
 
 /* ------------------------------------------------------------
-   navigation bar
+   NAVIGATION BAR SETUP
    ------------------------------------------------------------ */
 #navbar-brand {
-    margin-left: 40px;       /* Move brand slightly to the right */
+    margin-left: 60px;       /* Move brand slightly to the right */
 }
 
 #navbar-logo {
     height: 100%;
     max-height: 35px;   /* keeps it safely inside navbar */
     width: auto;
-    display: inline-block;
+    /*display: inline-block;*/
 }
 #navbar-brand:hover #navbar-logo {
-    opacity: 0.85;
+    opacity: 0.99;
     transition: opacity 0.2s ease-in-out;
 }
 
+/* ------------------------------------------------------------
+   MOBILE SPECIFIC TWEAKS (@media)
+   ------------------------------------------------------------ */
+@media (max-width: 768px) {
+    /* 1. Sidebar becomes an overlay on mobile */
+    .sidebar {
+        position: absolute; /* Overlay on top of map */
+        width: 85%;         /* Take up most of screen but leave a gap */
+        max-width: 350px;
+        box-shadow: 4px 0 10px rgba(0,0,0,0.5);
+    }
+
+    .sidebar-collapsed {
+        margin-left: -100%; /* Fully hide off screen */
+    }
+
+    /* 2. Adjust Sidebar width for History tab too */
+    #sidebar-hist {
+        width: 85%;
+        max-width: 350px;
+    }
+
+    /* 3. Move Legend to Bottom Left or make smaller to avoid clutter */
+    .risk-legend-box {
+        top: auto;
+        /*bottom: 60px; /* Above the date display */
+        right: 10px;
+        font-size: 0.75rem;
+        padding: 5px;
+    }
+    
+    .current-date-display-box {
+        font-size: 0.75rem;
+        bottom: 15px;
+        right: 10px;
+    }
+
+    /* 4. Chart Popup text size */
+    .chart-popup-container {
+        min-width: 260px;
+        height: 200px;
+    }
+}

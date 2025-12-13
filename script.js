@@ -718,7 +718,7 @@ function showChartPopup(site, marker) {
     
     const popup = L.popup({ 
         closeButton: true, 
-        minWidth: 350, 
+        minWidth: 280, 
         maxWidth: 550,
         autoClose: true,
         className: 'water-level-popup'
@@ -1326,7 +1326,7 @@ async function renderHistoricalPlot(graphType, siteId, eventId) {
                 legend: { x: 0.01, y: 1.1, orientation: 'v' } // Legend at top-left
             };
         }
-        
+
         
         else if (graphType === 'interannual') {
             // --- INTERANNUAL VARIABILITY (Bar Chart) ---
@@ -1582,7 +1582,7 @@ function setupSidebarToggle() {
         setTimeout(() => {
             if (myLeafletMap) myLeafletMap.invalidateSize();
             if (Plotly) Plotly.Plots.resize('Historical_plot');
-        }, 400);
+        }, 350);
     });
 }
 
