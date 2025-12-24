@@ -257,16 +257,30 @@ html, body {
 /* ------------------------------------------------------------
    NAVIGATION BAR SETUP
    ------------------------------------------------------------ */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px; 
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 #navbar-brand {
-    margin-left: 60px;       /* Move brand slightly to the right */
+    margin-left: 60px;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 #navbar-logo {
-    height: 100%;
-    max-height: 35px;   /* keeps it safely inside navbar */
+    height:100%; 
+    max-height: 70px;   /* keeps it safely inside navbar */
     width: auto;
-    /*display: inline-block;*/
+    display: block;
+    object-fit: contain; 
 }
+
 #navbar-brand:hover #navbar-logo {
     opacity: 0.99;
     transition: opacity 0.2s ease-in-out;
@@ -313,5 +327,8 @@ html, body {
     .chart-popup-container {
         min-width: 260px;
         height: 200px;
+    
+    #navbar-logo {
+        height: 36px;
     }
 }
